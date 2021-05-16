@@ -3,24 +3,24 @@ package org.example;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
+import org.openqa.selenium.*;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.*;
-
+import org.apache.log4j.Logger;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 
 public class App {
     public WebDriver driver;
-
+    final static Logger logger = Logger.getLogger(App.class);
     @Before
     public void setupDriver() {
         System.setProperty("webserver.chrome.driver", "../chromedriver.exe");
         driver = new ChromeDriver();
-        String url = "https://www.gittigidiyor.com/";
+        String url = "https://www.gittigidiyor.com.tr/";
         driver.get(url);
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -40,7 +40,7 @@ public class App {
 
         WebElement mailBox = driver.findElement(By.id("L-UserNameField"));
         mailBox.click();
-        mailBox.sendKeys("your username / e-mail");
+        mailBox.sendKeys("your e-mail");
 
         WebElement password = driver.findElement(By.id("L-PasswordField"));
         password.click();
@@ -73,41 +73,37 @@ public class App {
         /* Açılan ürün sayfasında ürünün sepete eklenmesi*/
         WebElement quantityBox = driver.findElement(By.id("buyitnow_adet"));
         quantityBox.click();
-//        quantityBox.clear();
-        quantityBox.sendKeys("1");
         driver.manage().timeouts().implicitlyWait(45, TimeUnit.SECONDS);
 
         WebElement basketBtn = driver.findElement(By.id("add-to-basket"));
-//        js.executeScript("arguments[0].scrollIntoView();", basketBtn);
+        js.executeScript("arguments[0].scrollIntoView();", basketBtn);
         basketBtn.click();
         driver.manage().timeouts().implicitlyWait(45, TimeUnit.SECONDS);
         driver.findElement(By.xpath("//*[@id=\"header_wrapper\"]/div[4]/div[3]/a/div[1]")).click();
         driver.manage().timeouts().implicitlyWait(45, TimeUnit.SECONDS);
         driver.findElement(By.xpath("//*[@id=\"header_wrapper\"]/div[4]/div[3]/div/div/div/div[2]/div[4]/div[1]/a")).click();
 
-        /* Ürün sayfasındaki fiyat ile sepetteki fiyatın karşılaştırılması */
-        WebElement priceBasket = driver.findElement(By.xpath("//*[@id=\"submit-cart\"]/div/div[2]/div[3]/div/div[1]/div/div[5]/div[1]/div/ul/li[1]/div[2]"));
-        String priceText2 = priceBasket.getText();
+        WebElement PBasketPrice = driver.findElement(By.xpath("//*[@id=\"cart-price-container\"]/div[3]/p"));
+        String BasketPrice = PBasketPrice.getText();
+        logger.info("Sepet Fiyatı : " + BasketPrice);
 
-        if (priceText.compareTo(priceText2) == 0) {
+//        Actions action = new Actions(driver);
+//        WebElement elem = driver.findElement(By.xpath("//*[@class='amount']"));
+//
+//        action.moveToElement(elem).build().perform();
+//        action.contextClick(elem).sendKeys(Keys.ARROW_DOWN).sendKeys(Keys.ENTER).build().perform();
 
-            System.out.println("fiyatlar" + priceText + "," + priceText2);
-            /* Sepetteki ürün adetinin artırılması */
-            WebElement goToBasket = driver.findElement(By.xpath("//*[@id=\"header_wrapper\"]/div[4]/div[3]/div/div/div/div[2]/div[4]/div[1]/a"));
-            goToBasket.click();
-            WebElement quantityBasket = driver.findElement(By.xpath("//*[@class=\"gg-input gg-input-select \"]/div[1]/div[4]/div/div[2]"));
-            quantityBasket.click();
-//            quantityBox.clear();
-//            quantityBox.sendKeys("2");
-            WebElement quantityIncrease = driver.findElement(By.xpath("//*[@class=\"amount\"]/div[1]/div[4]/div/div[2]/select/option[2]"));
-            quantityIncrease.click();
-        }
+        /* Sepetin boşaltılması */
 
-        /* Sepetteki ürünlerin boşaltılması */
-        driver.manage().timeouts().implicitlyWait(45, TimeUnit.SECONDS);
-        driver.findElement(By.className("gg-icon")).click();
+        driver.findElement(By.cssSelector(".btn-delete.btn-update-item.hidden-m")).click();
+        logger.info("Sepet Boşaltıldı");
 
-    }
+        WebElement BasketCheck = driver.findElement(By.xpath("//*[@id=\"cart-price-container\"]/div[3]/p"));
+        String Check = BasketCheck.getText();
+
+        if (Check.equals("")) {
+            logger.info("Sepetin boş olduğu kontrolü");
+        }}
 
     @After
     public void quitDriver() {
